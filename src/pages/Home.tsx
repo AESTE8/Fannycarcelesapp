@@ -159,7 +159,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             {/* Remplacement du carré par une photo de profil ronde */}
             <img 
-              src="/profil.jpg" 
+              src="https://images.iadfrance.fr/profile-picture/d9/2d/03/d92d0312cbef74b230ef7fd2894e55ed153c9303b43e32c15cfc558f41c10959.png?format=auto&width=640" 
               alt="Fanny Carceles" 
               className="w-12 h-12 rounded-full object-cover border-2 border-[#003366]/10 shadow-sm"
               referrerPolicy="no-referrer"
@@ -561,7 +561,7 @@ export default function Home() {
       <footer className="bg-[#001a33] text-slate-400 py-16 text-center border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4">
           <img 
-            src="/profil.jpg" 
+            src="https://images.iadfrance.fr/profile-picture/d9/2d/03/d92d0312cbef74b230ef7fd2894e55ed153c9303b43e32c15cfc558f41c10959.png?format=auto&width=640" 
             alt="Fanny Carceles" 
             className="w-16 h-16 rounded-full object-cover border-2 border-white/20 mx-auto mb-6 grayscale hover:grayscale-0 transition-all duration-500"
             referrerPolicy="no-referrer"
