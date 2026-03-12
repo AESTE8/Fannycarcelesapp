@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == "esteban.aubree@gmail.com" && request.auth.token.email_verified == true;
+    }
+
+    match /leads/{leadId} {
+      // Autoriser la création de leads (formulaire de contact public)
+      allow create: if true;
+      // Seul l'admin peut lire, modifier ou supprimer
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

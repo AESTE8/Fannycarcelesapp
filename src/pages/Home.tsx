@@ -105,10 +105,6 @@ export default function Home() {
       });
       
       setIsSuccess(true);
-      setFormData({
-        firstName: '', lastName: '', email: '', phone: '',
-        propertyType: 'Appartement', address: '', surface: '', rooms: '', features: [], message: ''
-      });
       setShowOtherInput(false);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -326,10 +322,16 @@ export default function Home() {
                     </div>
                     <h4 className="text-3xl font-bold text-emerald-900 mb-4 tracking-tight">Demande envoyée !</h4>
                     <p className="text-emerald-700 text-lg mb-8">
-                      Merci pour votre confiance. Je vous recontacte très prochainement au <strong>{formData.phone}</strong> pour discuter de votre projet.
+                      Merci pour votre confiance. Je vous recontacterai très prochainement au <strong>{formData.phone}</strong> pour discuter de votre projet.
                     </p>
                     <button 
-                      onClick={() => setIsSuccess(false)}
+                      onClick={() => {
+                        setIsSuccess(false);
+                        setFormData({
+                          firstName: '', lastName: '', email: '', phone: '',
+                          propertyType: 'Appartement', address: '', surface: '', rooms: '', features: [], message: ''
+                        });
+                      }}
                       className="text-[#003366] font-bold hover:underline flex items-center justify-center gap-2 mx-auto"
                     >
                       Envoyer une autre demande <ArrowRight className="w-4 h-4" />
