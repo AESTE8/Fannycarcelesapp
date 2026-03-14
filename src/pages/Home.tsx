@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Building, Home as HomeIcon, MapPin, Phone, Mail, CheckCircle2, ArrowRight, Star, Quote, ExternalLink } from 'lucide-react';
+import { Building, Home as HomeIcon, MapPin, Phone, Mail, CheckCircle2, ArrowRight, Star, Quote, ExternalLink, Facebook, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Types pour l'API Adresse
@@ -124,7 +124,7 @@ export default function Home() {
     {
       name: "Romain.F",
       title: "Disponibilité efficacité",
-      text: "Fanny est d'une grande disponibilité, passionnée par son métier, ce qui facilite grandement votre projet immobilier, car tout deviens très simple grace à son professionnalisme et la connaissance de son métier. Je vous la recommande grandement si vous avez un projet immobilier , vente, achat estimation ou autre , et notamment sur la commune d'Allevard que Fanny connait très bien.",
+      text: "Fanny est d'une grande disponibilité, passionnée par son métier, ce qui facilite grandement votre projet immobilier, car tout deviens très simple grace à son professionnalisme et la connaissance de son métier. Je vous la recommande grandement si vous avez un projet immobilier , vente, achat avis de valeur ou autre , et notamment sur la commune d'Allevard que Fanny connait très bien.",
       date: "19/01/2026"
     },
     {
@@ -148,7 +148,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-[#003366] selection:text-white">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-[#003366]/20 selection:text-[#003366]">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -168,7 +168,7 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8">
             <a href="#services" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Mes services</a>
             <a href="#avis" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Avis clients</a>
-            <a href="#estimation" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Estimer mon bien</a>
+            <a href="#avis-valeur" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Obtenir mon avis de valeur</a>
             <a href="tel:+33645003752" className="flex items-center gap-2 bg-[#003366]/5 text-[#003366] px-4 py-2 rounded-full font-bold hover:bg-[#003366]/10 transition-colors">
               <Phone className="w-4 h-4" />
               06 45 00 37 52
@@ -200,17 +200,17 @@ export default function Home() {
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
               <span>Votre conseillère de confiance sur Allevard et ses environs</span>
             </div>
-            <h2 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
-              Vendez votre bien au <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">meilleur prix</span>.
+            <h2 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] drop-shadow-sm">
+              Vendez votre bien au <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x">meilleur prix</span>.
             </h2>
             <p className="text-xl text-slate-300 mb-10 leading-relaxed font-light max-w-xl">
-              De l'estimation précise à la signature chez le notaire, je vous accompagne à chaque étape avec la puissance du réseau IAD France.
+              De l'avis de valeur précis de votre bien à la signature chez le notaire, je vous accompagne à chaque étape avec la puissance du réseau IAD France.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a href="#estimation" className="bg-white text-[#003366] px-8 py-4 rounded-xl font-bold text-lg text-center hover:bg-slate-50 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] flex items-center justify-center gap-2 hover:-translate-y-0.5">
-                Estimer mon bien <ArrowRight className="w-5 h-5" />
+            <div className="flex flex-col sm:flex-row gap-5">
+              <a href="#avis-valeur" className="bg-white text-[#003366] px-8 py-4 rounded-full font-extrabold text-lg text-center hover:bg-slate-50 transition-all shadow-[0_8px_30px_rgb(255,255,255,0.15)] hover:shadow-[0_8px_30px_rgb(255,255,255,0.3)] flex items-center justify-center gap-2 hover:-translate-y-1">
+                Obtenir mon avis de valeur <ArrowRight className="w-5 h-5" />
               </a>
-              <a href="https://www.iadfrance.fr/conseiller-immobilier/fanny.carceles" target="_blank" rel="noopener noreferrer" className="border border-white/30 bg-white/5 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold text-lg text-center hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+              <a href="https://www.iadfrance.fr/conseiller-immobilier/fanny.carceles" target="_blank" rel="noopener noreferrer" className="border border-white/20 bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg text-center hover:bg-white/20 transition-all flex items-center justify-center gap-2 hover:-translate-y-1">
                 Voir ma page IAD <ExternalLink className="w-5 h-5" />
               </a>
             </div>
@@ -228,7 +228,7 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: MapPin, title: "Expertise Locale", desc: "Une connaissance pointue du marché immobilier local pour une estimation juste et précise de votre bien." },
+              { icon: MapPin, title: "Expertise Locale", desc: "Une connaissance pointue du marché immobilier local pour un avis de valeur juste et précis de votre bien." },
               { icon: Building, title: "Réseau IAD France", desc: "La force du 1er réseau de mandataires en France pour une diffusion massive et ciblée de votre annonce." },
               { icon: CheckCircle2, title: "Accompagnement de A à Z", desc: "Je gère les visites, la négociation et les démarches administratives jusqu'à l'acte authentique." }
             ].map((service, idx) => (
@@ -240,7 +240,7 @@ export default function Home() {
                 transition={{ delay: idx * 0.2 }}
                 className="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all group"
               >
-                <div className="w-16 h-16 bg-white shadow-sm border border-slate-100 text-[#003366] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#003366] group-hover:text-white transition-all duration-300">
+                <div className="w-16 h-16 bg-blue-50/50 shadow-[0_0_15px_rgba(0,51,102,0.05)] border border-blue-100 text-[#003366] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#003366] group-hover:text-white group-hover:shadow-[0_10px_30px_rgba(0,51,102,0.2)] transition-all duration-300">
                   <service.icon className="w-8 h-8" />
                 </div>
                 <h4 className="text-xl font-bold mb-3 text-slate-900">{service.title}</h4>
@@ -259,8 +259,8 @@ export default function Home() {
               <h3 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Ils m'ont fait confiance</h3>
               <p className="text-lg text-slate-500 font-medium">Découvrez les retours de mes clients sur leur expérience.</p>
             </div>
-            <a href="https://www.iadfrance.fr/conseiller-immobilier/fanny.carceles" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#003366] font-bold hover:underline">
-              Voir tous les avis sur IAD France <ArrowRight className="w-4 h-4" />
+            <a href="https://www.immodvisor.com/professionnels/mandataire-immobilier/pro/iad-france-fanny-carceles-67889" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#003366] font-bold hover:underline">
+              Voir tous les avis sur Immodvisor <ArrowRight className="w-4 h-4" />
             </a>
           </div>
         </div>
@@ -279,7 +279,7 @@ export default function Home() {
                 <Quote className="absolute top-8 right-8 w-12 h-12 text-slate-50 opacity-50" />
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                    <Star key={i} className="w-5 h-5 text-[#003366] fill-[#003366]" />
                   ))}
                 </div>
                 <h4 className="font-bold text-lg text-slate-900 mb-3">{review.title}</h4>
@@ -295,17 +295,17 @@ export default function Home() {
       </section>
 
       {/* Estimation Form Section */}
-      <section id="estimation" className="py-24 bg-white">
+      <section id="avis-valeur" className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-slate-100 overflow-hidden">
-            <div className="bg-[#003366] p-10 md:p-16 text-center text-white relative overflow-hidden">
+          <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,51,102,0.1)] border border-slate-100 overflow-hidden transition-all hover:shadow-[0_20px_60px_-15px_rgba(0,51,102,0.15)]">
+            <div className="bg-gradient-to-br from-[#003366] to-[#001a33] p-10 md:p-16 text-center text-white relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
                 <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
                 <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-400 rounded-full blur-3xl"></div>
               </div>
               <h3 className="text-4xl font-extrabold mb-4 relative z-10 tracking-tight">Vous souhaitez vendre ?</h3>
               <p className="text-blue-100 text-lg max-w-2xl mx-auto relative z-10 font-light">
-                Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer une estimation gratuite et confidentielle.
+                Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer un avis de valeur gratuit et confidentiel.
               </p>
             </div>
             
@@ -536,7 +536,7 @@ export default function Home() {
                     <button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="w-full bg-[#003366] text-white py-5 rounded-2xl font-bold text-lg hover:bg-[#002244] transition-all disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                      className="w-full bg-gradient-to-r from-[#003366] to-[#004d99] text-white py-5 rounded-2xl font-bold text-lg hover:from-[#002244] hover:to-[#003366] transition-all disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 hover:shadow-xl hover:-translate-y-0.5"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
@@ -544,7 +544,7 @@ export default function Home() {
                           Envoi en cours...
                         </span>
                       ) : (
-                        'Demander mon estimation gratuite'
+                        'Demander mon avis de valeur gratuit'
                       )}
                     </button>
                     <p className="text-sm text-slate-500 text-center mt-6 flex items-center justify-center gap-2">
@@ -571,12 +571,21 @@ export default function Home() {
           <h4 className="text-white font-bold text-xl mb-2 tracking-tight">Fanny Carceles</h4>
           <p className="mb-8 font-medium">Conseillère Indépendante en Immobilier - IAD France</p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
             <a href="mailto:fanny.carceles@iadfrance.fr" className="bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors flex items-center gap-3 text-white">
               <Mail className="w-5 h-5" /> fanny.carceles@iadfrance.fr
             </a>
             <a href="tel:+33645003752" className="bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors flex items-center gap-3 text-white">
               <Phone className="w-5 h-5" /> 06 45 00 37 52
+            </a>
+          </div>
+          
+          <div className="flex items-center justify-center gap-6 mb-12">
+            <a href="https://www.facebook.com/profile.php?id=100093367500164" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white/5 hover:bg-blue-600 hover:scale-110 rounded-full flex items-center justify-center transition-all text-white">
+              <Facebook className="w-6 h-6" />
+            </a>
+            <a href="https://www.instagram.com/conseillere_immo_allevard_?igsh=ZjkxbnJleXlhYno3" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white/5 hover:bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:scale-110 rounded-full flex items-center justify-center transition-all text-white">
+              <Instagram className="w-6 h-6" />
             </a>
           </div>
           

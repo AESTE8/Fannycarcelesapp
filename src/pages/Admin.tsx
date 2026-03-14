@@ -164,7 +164,7 @@ export default function Admin() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Demandes d'estimation</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Demandes d'avis de valeur</h2>
             <p className="text-slate-500 mt-1">Vous avez {leads.length} demandes de contact.</p>
           </div>
         </div>

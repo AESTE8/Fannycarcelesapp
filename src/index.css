@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+body {
+  font-family: 'Outfit', sans-serif;
+}
+
 @layer utilities {
   .animate-marquee {
     animation: marquee 40s linear infinite;
@@ -12,4 +16,16 @@
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(calc(-50% - 1rem)); } /* -50% of the total width (which is 2x the original content) minus gap */
+}
+
+@layer utilities {
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 6s ease infinite;
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
