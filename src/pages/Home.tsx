@@ -64,15 +64,34 @@ export default function Home() {
     const query = e.target.value;
     setFormData({ ...formData, address: query });
     
-    if (query.length > 3) {
+    if (query.trim().length > 3) {
       try {
-        // Utilisation de l'API gratuite du gouvernement français (Base Adresse Nationale)
-        const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout
+
+        const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
         const data = await response.json();
-        setAddressSuggestions(data.features);
-        setShowSuggestions(true);
+        
+        if (data && data.features) {
+          setAddressSuggestions(data.features);
+          setShowSuggestions(true);
+        } else {
+          setAddressSuggestions([]);
+          setShowSuggestions(false);
+        }
       } catch (error) {
         console.error("Erreur lors de la recherche d'adresse:", error);
+        setAddressSuggestions([]);
+        setShowSuggestions(false);
       }
     } else {
       setAddressSuggestions([]);
@@ -305,7 +324,7 @@ export default function Home() {
               </div>
               <h3 className="text-4xl font-extrabold mb-4 relative z-10 tracking-tight">Vous souhaitez vendre ?</h3>
               <p className="text-blue-100 text-lg max-w-2xl mx-auto relative z-10 font-light">
-                Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer un avis de valeur gratuit et confidentiel.
+                Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer un avis de valeur gratuit et confidential.
               </p>
             </div>
             
