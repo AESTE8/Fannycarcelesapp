@@ -114,14 +114,27 @@ export default function Home() {
     try {
       const { supabase } = await import('../supabase');
       
-      const { error } = await supabase.from('leads').insert([{
-        ...formData,
+      const leadData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        propertyType: formData.propertyType,
+        address: formData.address,
         surface: parseInt(formData.surface) || 0,
         rooms: parseInt(formData.rooms) || 0,
+        features: formData.features || [],
+        message: formData.message || '',
+        createdAt: new Date().toISOString(),
         status: 'new'
-      }]);
-      
-      if (error) throw error;
+      };
+
+      const { error } = await supabase.from('leads').insert([leadData]);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       setIsSuccess(true);
       setShowOtherInput(false);

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Home, Calendar, MapPin, Mail, Phone, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
-import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { db, auth } from '../firebase';
+import { supabase } from '../supabase';
 
 interface Lead {
   id: string;
@@ -22,52 +20,90 @@ interface Lead {
 }
 
 export default function Admin() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [authChecking, setAuthChecking] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setAuthChecking(false);
     });
-    return () => unsubscribe();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user) return;
 
     setIsLoading(true);
-    const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const leadsData: Lead[] = [];
-      snapshot.forEach((doc) => {
-        leadsData.push({ id: doc.id, ...doc.data() } as Lead);
-      });
-      setLeads(leadsData);
-      setIsLoading(false);
-    }, (error) => {
-      console.error("Error fetching leads:", error);
-      setIsLoading(false);
-    });
 
-    return () => unsubscribe();
+    const fetchLeads = async () => {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('createdAt', { ascending: false });
+        
+      if (!error && data) {
+        setLeads(data);
+      }
+      setIsLoading(false);
+    };
+
+    fetchLeads();
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads',
+        },
+        () => {
+          fetchLeads();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
-  const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsLoggingIn(true);
     try {
-      await signInWithPopup(auth, provider);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setLoginError('Identifiants incorrects.');
+      }
     } catch (error) {
       console.error("Error signing in:", error);
+      setLoginError('Une erreur est survenue.');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -76,14 +112,6 @@ export default function Admin() {
   const formatDate = (timestamp: any) => {
     if (!timestamp) return 'Date inconnue';
     
-    // Handle Firestore Timestamp
-    if (timestamp instanceof Timestamp || (timestamp.seconds && timestamp.nanoseconds)) {
-      return new Date(timestamp.seconds * 1000).toLocaleDateString('fr-FR', { 
-        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-      });
-    }
-    
-    // Fallback for other formats
     try {
       return new Date(timestamp).toLocaleDateString('fr-FR', { 
         day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -114,14 +142,42 @@ export default function Admin() {
             />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Espace Conseillère</h2>
-          <p className="text-slate-500 mb-8">Connectez-vous avec votre compte Google pour voir vos prospects</p>
+          <p className="text-slate-500 mb-8">Connectez-vous pour voir vos prospects</p>
           
-          <button 
-            onClick={handleLogin}
-            className="w-full bg-[#003366] text-white py-3 rounded-xl font-bold hover:bg-[#002244] transition-colors flex items-center justify-center gap-2"
-          >
-            Se connecter avec Google
-          </button>
+          <form onSubmit={handleLogin} className="space-y-4">
+            {loginError && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-left">
+                {loginError}
+              </div>
+            )}
+            <div>
+              <input 
+                type="email" 
+                placeholder="Adresse email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] outline-none"
+              />
+            </div>
+            <div>
+              <input 
+                type="password" 
+                placeholder="Mot de passe"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] outline-none"
+              />
+            </div>
+            <button 
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full bg-[#003366] text-white py-3 rounded-xl font-bold hover:bg-[#002244] transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {isLoggingIn ? 'Connexion...' : 'Se connecter'}
+            </button>
+          </form>
           
           <div className="mt-6 text-center">
             <Link className="text-sm text-slate-500 hover:text-[#003366]" to="/">
