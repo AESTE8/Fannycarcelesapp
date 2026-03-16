@@ -112,16 +112,16 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-      const { db } = await import('../firebase');
+      const { supabase } = await import('../supabase');
       
-      await addDoc(collection(db, 'leads'), {
+      const { error } = await supabase.from('leads').insert([{
         ...formData,
         surface: parseInt(formData.surface) || 0,
         rooms: parseInt(formData.rooms) || 0,
-        createdAt: serverTimestamp(),
         status: 'new'
-      });
+      }]);
+      
+      if (error) throw error;
       
       setIsSuccess(true);
       setShowOtherInput(false);
@@ -324,7 +324,7 @@ export default function Home() {
               </div>
               <h3 className="text-4xl font-extrabold mb-4 relative z-10 tracking-tight">Vous souhaitez vendre ?</h3>
               <p className="text-blue-100 text-lg max-w-2xl mx-auto relative z-10 font-light">
-                Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer un avis de valeur gratuit et confidential.
+                Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer un avis de valeur gratuit et confidentiel.
               </p>
             </div>
             
