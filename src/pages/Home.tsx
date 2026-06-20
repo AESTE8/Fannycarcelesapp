@@ -9,6 +9,12 @@ import { SplitText } from 'gsap/SplitText';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
 
+// Clé d'accès Web3Forms. Publique par conception : elle ne permet QUE
+// d'envoyer un message à l'email pré-configuré. Protégée par restriction
+// de domaine (dashboard Web3Forms) + honeypot. Définie via la variable
+// d'env Vite VITE_WEB3FORMS_ACCESS_KEY (Vercel → Environment Variables).
+const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY as string;
+
 interface AddressFeature {
   properties: {
     label: string;
@@ -109,13 +115,14 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/submit', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
           botcheck: botcheckRef.current?.checked || false,
           subject: `Nouvelle estimation — ${formData.firstName} ${formData.lastName} (${formData.address})`,
           from_name: 'Site Fanny Carceles',
