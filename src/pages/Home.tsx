@@ -53,6 +53,7 @@ export default function Home() {
   const [addressSuggestions, setAddressSuggestions] = useState<AddressFeature[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const addressRef = useRef<HTMLDivElement>(null);
+  const botcheckRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,23 +109,31 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const { supabase } = await import('../supabase');
-      const leadData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        propertyType: formData.propertyType,
-        address: formData.address,
-        surface: parseInt(formData.surface) || 0,
-        rooms: parseInt(formData.rooms) || 0,
-        features: formData.features || [],
-        message: formData.message || '',
-        createdAt: new Date().toISOString(),
-        status: 'new'
-      };
-      const { error } = await supabase.from('leads').insert([leadData]);
-      if (error) throw error;
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          botcheck: botcheckRef.current?.checked || false,
+          subject: `Nouvelle estimation — ${formData.firstName} ${formData.lastName} (${formData.address})`,
+          from_name: 'Site Fanny Carceles',
+          replyto: formData.email,
+          'Type de bien': formData.propertyType,
+          Adresse: formData.address,
+          Surface: `${formData.surface} m²`,
+          Pièces: formData.rooms,
+          Prénom: formData.firstName,
+          Nom: formData.lastName,
+          Email: formData.email,
+          Téléphone: formData.phone,
+          Atouts: (formData.features || []).join(', ') || '—',
+          Message: formData.message || '—',
+        }),
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message || 'Envoi échoué');
       setIsSuccess(true);
       setShowOtherInput(false);
     } catch (error) {
@@ -730,6 +739,16 @@ export default function Home() {
                     onSubmit={handleSubmit}
                     className="space-y-8"
                   >
+                    {/* Honeypot anti-spam — invisible pour les humains, rempli par les bots */}
+                    <input
+                      ref={botcheckRef}
+                      type="checkbox"
+                      name="botcheck"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      className="hidden"
+                      aria-hidden="true"
+                    />
                     <div className="space-y-6">
                       <h4 className="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4">1. Votre bien</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
