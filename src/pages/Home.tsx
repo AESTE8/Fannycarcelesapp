@@ -190,10 +190,11 @@ export default function Home() {
           ease: "back.out(1.7)"
         });
 
-        // H1 split text reveal word by word
+        // H1 split text reveal word by word (ignore gradient span)
         SplitText.create(".hero-title", {
           type: "words",
           autoSplit: true,
+          ignore: ".hero-gradient",
           onSplit(self) {
             return gsap.from(self.words, {
               y: 80,
@@ -205,6 +206,16 @@ export default function Home() {
               delay: 0.5
             });
           }
+        });
+
+        // Gradient city name entrance
+        gsap.from(".hero-gradient", {
+          y: 80,
+          autoAlpha: 0,
+          rotationX: -40,
+          duration: 0.8,
+          ease: "back.out(1.4)",
+          delay: 1.0
         });
 
         // Subtitle wipe in
@@ -553,7 +564,7 @@ export default function Home() {
               <span>48 transactions réalisées · 4,8/5 sur 28 avis vérifiés</span>
             </div>
             <h1 className="hero-title text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] drop-shadow-sm" style={{ perspective: "600px" }}>
-              Votre conseillère immobilière à <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x">Allevard&#8209;les&#8209;Bains</span>.
+              Votre conseillère immobilière à <span className="hero-gradient invisible inline-block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x" style={{ perspective: "600px" }}>Allevard&#8209;les&#8209;Bains</span>.
             </h1>
             <p className="hero-subtitle invisible text-xl text-slate-300 mb-10 leading-relaxed font-light max-w-xl">
               Vente, achat, estimation : je vous accompagne de l'avis de valeur gratuit jusqu'à la signature chez le notaire. Allevard, Le Collet, Crêts&#8209;en&#8209;Belledonne et tout le Pays d'Allevard.
