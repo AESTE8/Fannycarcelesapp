@@ -1,0 +1,12 @@
+# robots.txt pour fannycarceles-immobilier-allevard.fr
+
+User-agent: *
+Allow: /
+
+Sitemap: https://fannycarceles-immobilier-allevard.fr/sitemap.xml
+
+# Interdire l'accès aux fichiers de développement et cache
+Disallow: /api/
+Disallow: /node_modules/
+Disallow: /.vercel/
+Disallow: /src/

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Building, Home as HomeIcon, MapPin, Phone, Mail, CheckCircle2, ArrowRight, Star, Quote, ExternalLink, Facebook, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -623,7 +624,9 @@ export default function Home() {
           
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
             <p>&copy; {new Date().getFullYear()} Fanny Carceles. Tous droits réservés.</p>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
+              <Link to="/confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link>
               <a href="https://www.iadfrance.fr/conseiller-immobilier/fanny.carceles" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Page IAD France</a>
             </div>
           </div>
