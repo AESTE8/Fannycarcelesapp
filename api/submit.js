@@ -39,10 +39,20 @@ export default async function handler(req, res) {
       body: JSON.stringify({ ...fields, access_key: accessKey }),
     });
 
-    const result = await response.json();
+    // Lecture défensive : Web3Forms peut renvoyer du non-JSON en cas d'erreur.
+    const raw = await response.text();
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch {
+      result = { success: false, message: raw.slice(0, 300) };
+    }
     return res.status(response.status).json(result);
   } catch (error) {
     console.error('Erreur proxy Web3Forms:', error);
-    return res.status(500).json({ success: false, message: 'Erreur serveur' });
+    // Diagnostic temporaire : on expose le message d'erreur réel.
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erreur serveur', debug: String(error?.message || error) });
   }
 }
