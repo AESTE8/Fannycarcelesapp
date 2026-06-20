@@ -9,6 +9,11 @@ import { SplitText } from 'gsap/SplitText';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
 
+// Clé d'accès Web3Forms (publique par conception : elle ne permet QUE
+// d'envoyer un message vers l'email pré-configuré chez Web3Forms).
+// À sécuriser via la restriction de domaine dans le dashboard Web3Forms.
+const WEB3FORMS_ACCESS_KEY = '4a077524-a350-494b-9dfb-bd2c9fb67855';
+
 interface AddressFeature {
   properties: {
     label: string;
@@ -109,24 +114,28 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/submit', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
           botcheck: botcheckRef.current?.checked || false,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          propertyType: formData.propertyType,
-          address: formData.address,
-          surface: formData.surface,
-          rooms: formData.rooms,
-          features: formData.features || [],
-          message: formData.message || '',
+          subject: `Nouvelle estimation — ${formData.firstName} ${formData.lastName} (${formData.address})`,
+          from_name: 'Site Fanny Carceles',
+          replyto: formData.email,
+          'Type de bien': formData.propertyType,
+          Adresse: formData.address,
+          Surface: `${formData.surface} m²`,
+          Pièces: formData.rooms,
+          Prénom: formData.firstName,
+          Nom: formData.lastName,
+          Email: formData.email,
+          Téléphone: formData.phone,
+          Atouts: (formData.features || []).join(', ') || '—',
+          Message: formData.message || '—',
         }),
       });
       const result = await response.json();
