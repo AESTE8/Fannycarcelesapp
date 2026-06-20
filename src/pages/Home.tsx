@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Building, Home as HomeIcon, MapPin, Phone, Mail, CheckCircle2, ArrowRight, Star, Quote, ExternalLink, Facebook, Instagram } from 'lucide-react';
+import { Building, Home as HomeIcon, MapPin, Phone, Mail, CheckCircle2, ArrowRight, Star, Quote, ExternalLink, Facebook, Instagram, HelpCircle, TrendingUp, Users, Mountain } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Types pour l'API Adresse
@@ -194,13 +194,14 @@ export default function Home() {
               referrerPolicy="no-referrer"
             />
             <div>
-              <h1 className="font-bold text-xl text-[#003366] leading-tight tracking-tight">Fanny Carceles</h1>
-              <p className="text-sm text-slate-500 font-medium">Conseillère IAD France</p>
+              <span className="font-bold text-xl text-[#003366] leading-tight tracking-tight">Fanny Carceles</span>
+              <p className="text-sm text-slate-500 font-medium">Conseillère immobilière — Allevard</p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#services" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Mes services</a>
             <a href="#avis" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Avis clients</a>
+            <a href="#faq" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">FAQ</a>
             <a href="#avis-valeur" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Obtenir mon avis de valeur</a>
             <a href="tel:+33645003752" className="flex items-center gap-2 bg-[#003366]/5 text-[#003366] px-4 py-2 rounded-full font-bold hover:bg-[#003366]/10 transition-colors">
               <Phone className="w-4 h-4" />
@@ -231,13 +232,13 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm font-medium mb-6 backdrop-blur-sm">
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span>Votre conseillère de confiance sur Allevard et ses environs</span>
+              <span>48 transactions réalisées · 4,8/5 sur 28 avis vérifiés</span>
             </div>
-            <h2 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] drop-shadow-sm">
-              Vendez votre bien au <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x">meilleur prix</span>.
-            </h2>
+            <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] drop-shadow-sm">
+              Votre conseillère immobilière à <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x">Allevard‑les‑Bains</span>.
+            </h1>
             <p className="text-xl text-slate-300 mb-10 leading-relaxed font-light max-w-xl">
-              De l'avis de valeur précis de votre bien à la signature chez le notaire, je vous accompagne à chaque étape avec la puissance du réseau IAD France.
+              Vente, achat, estimation : je vous accompagne de l'avis de valeur gratuit jusqu'à la signature chez le notaire. Allevard, Le Collet, Crêts‑en‑Belledonne et tout le Pays d'Allevard.
             </p>
             <div className="flex flex-col sm:flex-row gap-5">
               <a href="#avis-valeur" className="bg-white text-[#003366] px-8 py-4 rounded-full font-extrabold text-lg text-center hover:bg-slate-50 transition-all shadow-[0_8px_30px_rgb(255,255,255,0.15)] hover:shadow-[0_8px_30px_rgb(255,255,255,0.3)] flex items-center justify-center gap-2 hover:-translate-y-1">
@@ -261,9 +262,9 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: MapPin, title: "Expertise Locale", desc: "Une connaissance pointue du marché immobilier local pour un avis de valeur juste et précis de votre bien." },
-              { icon: Building, title: "Réseau IAD France", desc: "La force du 1er réseau de mandataires en France pour une diffusion massive et ciblée de votre annonce." },
-              { icon: CheckCircle2, title: "Accompagnement de A à Z", desc: "Je gère les visites, la négociation et les démarches administratives jusqu'à l'acte authentique." }
+              { icon: MapPin, title: "Expertise Allevard & Belledonne", desc: "Depuis 2021, j'accompagne vendeurs et acquéreurs sur Allevard-les-Bains, Le Collet, Crêts-en-Belledonne et les communes voisines. Je connais chaque quartier, chaque résidence, chaque copropriété." },
+              { icon: TrendingUp, title: "48 transactions réalisées", desc: "Appartements thermaux, maisons familiales, résidences secondaires, terrains constructibles ou biens vendus loués : un portefeuille diversifié adapté au marché local." },
+              { icon: CheckCircle2, title: "Accompagnement de A à Z", desc: "De l'estimation gratuite à la signature chez le notaire : visites, négociation, diagnostics, démarches administratives. Vous n'avez qu'un seul interlocuteur." }
             ].map((service, idx) => (
               <motion.div 
                 key={idx}
@@ -588,6 +589,55 @@ export default function Home() {
                 )}
               </AnimatePresence>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-24 bg-slate-50 border-t border-slate-200/60">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Questions fréquentes</h2>
+            <p className="text-lg text-slate-500 font-medium">Tout ce qu'il faut savoir avant de vendre ou acheter à Allevard-les-Bains.</p>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                q: "Comment obtenir un avis de valeur gratuit à Allevard ?",
+                a: "Remplissez le formulaire ci-dessus avec les informations de votre bien (type, adresse, surface, nombre de pièces). Je vous recontacte sous 24 h pour convenir d'une visite, puis je vous remets un avis de valeur détaillé, gratuit et sans engagement, basé sur ma connaissance du marché local et les transactions récentes comparables."
+              },
+              {
+                q: "Quelles communes couvrez-vous autour d'Allevard ?",
+                a: "J'interviens sur un rayon d'environ 40 km entre Grenoble et Chambéry : Allevard-les-Bains, Le Collet d'Allevard, Crêts-en-Belledonne, La Chapelle-du-Bard, Le Moutaret, Goncelin, Pontcharra, La Rochette et l'ensemble du Pays d'Allevard. Que ce soit un appartement en station thermale, une maison familiale en Belledonne ou un terrain constructible, je connais chaque secteur."
+              },
+              {
+                q: "Quel est le prix moyen au m² à Allevard-les-Bains ?",
+                a: "En 2025, les prix moyens à Allevard s'établissaient autour de 1 900 €/m² pour les appartements et 2 900 €/m² pour les maisons (source : données DVF). Le marché est segmenté : les petites surfaces thermales (studios, T2) se situent entre 60 000 € et 85 000 €, tandis que les maisons familiales démarrent vers 120 000 € selon l'état et la commune. Je vous fournis une estimation précise adaptée à votre bien."
+              },
+              {
+                q: "Combien de temps faut-il pour vendre un bien à Allevard ?",
+                a: "Le délai moyen dépend du type de bien et du positionnement prix. Un appartement bien estimé en centre-ville ou en résidence thermale se vend généralement en 2 à 4 mois. Les maisons et les biens atypiques peuvent prendre plus de temps. Un avis de valeur juste dès le départ est la clé pour vendre dans les meilleurs délais."
+              },
+              {
+                q: "L'estimation est-elle vraiment gratuite et sans engagement ?",
+                a: "Oui, l'avis de valeur est entièrement gratuit et n'engage à rien. C'est un document qui vous donne une fourchette de prix réaliste pour votre bien, basée sur les ventes comparables récentes à Allevard et dans les communes voisines. Vous êtes ensuite libre de me confier la vente ou non."
+              },
+              {
+                q: "Pourquoi acheter à Allevard-les-Bains ?",
+                a: "Allevard combine plusieurs atouts rares : une station thermale reconnue (rhumatologie, voies respiratoires), la proximité du Collet d'Allevard pour le ski, un cadre de montagne à 40 minutes de Grenoble, et des prix encore accessibles par rapport aux grandes stations alpines. C'est un marché attractif pour la résidence principale, la résidence secondaire ou l'investissement locatif (cure, tourisme, ski)."
+              }
+            ].map((item, idx) => (
+              <details key={idx} className="group bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <summary className="flex items-start gap-4 px-6 py-5 cursor-pointer list-none font-bold text-slate-900 hover:text-[#003366] transition-colors">
+                  <HelpCircle className="w-5 h-5 mt-0.5 text-[#003366] flex-shrink-0" />
+                  <span>{item.q}</span>
+                </summary>
+                <div className="px-6 pb-6 pl-15 text-slate-600 leading-relaxed">
+                  {item.a}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>
