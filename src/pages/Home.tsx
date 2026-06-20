@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Building, Home as HomeIcon, MapPin, Phone, Mail, CheckCircle2, ArrowRight, Star, Quote, ExternalLink, Facebook, Instagram, HelpCircle, TrendingUp, Users, Mountain } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
-// Types pour l'API Adresse
+gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
+
 interface AddressFeature {
   properties: {
     label: string;
@@ -24,12 +29,12 @@ export default function Home() {
     features: [] as string[],
     message: ''
   });
-  
+
   const [showOtherInput, setShowOtherInput] = useState(false);
-  
+
   const PROPERTY_FEATURES = [
-    'Balcon', 'Terrasse', 'Jardin', 'Garage / Parking', 
-    'Cave', 'Ascenseur', 'Vue dégagée', 'Refait à neuf', 
+    'Balcon', 'Terrasse', 'Jardin', 'Garage / Parking',
+    'Cave', 'Ascenseur', 'Vue dégagée', 'Refait à neuf',
     'Dernier étage', 'Lumineux', 'Calme', 'Piscine'
   ];
 
@@ -41,16 +46,14 @@ export default function Home() {
         : [...prev.features, feature]
     }));
   };
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
-  // États pour l'autocomplétion de l'adresse
+
   const [addressSuggestions, setAddressSuggestions] = useState<AddressFeature[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const addressRef = useRef<HTMLDivElement>(null);
 
-  // Fermer les suggestions si on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (addressRef.current && !addressRef.current.contains(event.target as Node)) {
@@ -64,24 +67,17 @@ export default function Home() {
   const handleAddressChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setFormData({ ...formData, address: query });
-    
+
     if (query.trim().length > 3) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout
-
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
         const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`, {
           signal: controller.signal
         });
-        
         clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-        
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
         const data = await response.json();
-        
         if (data && data.features) {
           setAddressSuggestions(data.features);
           setShowSuggestions(true);
@@ -89,8 +85,7 @@ export default function Home() {
           setAddressSuggestions([]);
           setShowSuggestions(false);
         }
-      } catch (error) {
-        console.error("Erreur lors de la recherche d'adresse:", error);
+      } catch {
         setAddressSuggestions([]);
         setShowSuggestions(false);
       }
@@ -114,7 +109,6 @@ export default function Home() {
     setIsSubmitting(true);
     try {
       const { supabase } = await import('../supabase');
-      
       const leadData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -129,14 +123,8 @@ export default function Home() {
         createdAt: new Date().toISOString(),
         status: 'new'
       };
-
       const { error } = await supabase.from('leads').insert([leadData]);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-      
+      if (error) throw error;
       setIsSuccess(true);
       setShowOtherInput(false);
     } catch (error) {
@@ -148,48 +136,383 @@ export default function Home() {
   };
 
   const reviews = [
-    {
-      name: "Daniel",
-      title: "Très bon service",
-      text: "Toujours disponible, rapide dans la résolution d'une ou autre difficulté. Je recommande vivement !",
-      date: "19/01/2026"
-    },
-    {
-      name: "Romain.F",
-      title: "Disponibilité efficacité",
-      text: "Fanny est d'une grande disponibilité, passionnée par son métier, ce qui facilite grandement votre projet immobilier, car tout deviens très simple grace à son professionnalisme et la connaissance de son métier. Je vous la recommande grandement si vous avez un projet immobilier , vente, achat avis de valeur ou autre , et notamment sur la commune d'Allevard que Fanny connait très bien.",
-      date: "19/01/2026"
-    },
-    {
-      name: "Carole D",
-      title: "Très bon travail",
-      text: "Mme Carceles nous a accompagné dans la vente d'un bien. Étant à distance nous cherchions une personne de confiance qui pourrait s'occuper de tout de A à Z. Paris réussi. De plus, la communication est très facile et sa réactivité sans faille. Nous recommandons vivement.",
-      date: "12/01/2026"
-    },
-    {
-      name: "Pierre.",
-      title: "Transaction parfaite.",
-      text: "Bonne connaissance des lieux et du bien à vendre, bonne connaissance du fonctionnement de la copro et des prestations du bien à vendre. Disponibilité, réactivité et réponses à nos questions données rapidement par mail ou téléphone. Liens avec le vendeur et le notaire très appréciable. Merci.",
-      date: "16/04/2025"
-    },
-    {
-      name: "MAD",
-      title: "Excellente collaboration",
-      text: "Nous avons confié la vente de notre logement à Fanny Carcélès. Elle géra notre affaire de manière très professionnelle. A l'écoute et bienveillante, elle a su nous mettre en confiance. Ses conseils furent pertinents et fructueux. Nous vous souhaitons une belle continuation",
-      date: "10/04/2025"
-    }
+    { name: "Daniel", title: "Très bon service", text: "Toujours disponible, rapide dans la résolution d'une ou autre difficulté. Je recommande vivement !", date: "19/01/2026" },
+    { name: "Romain.F", title: "Disponibilité efficacité", text: "Fanny est d'une grande disponibilité, passionnée par son métier, ce qui facilite grandement votre projet immobilier, car tout deviens très simple grace à son professionnalisme et la connaissance de son métier. Je vous la recommande grandement si vous avez un projet immobilier , vente, achat avis de valeur ou autre , et notamment sur la commune d'Allevard que Fanny connait très bien.", date: "19/01/2026" },
+    { name: "Carole D", title: "Très bon travail", text: "Mme Carceles nous a accompagné dans la vente d'un bien. Étant à distance nous cherchions une personne de confiance qui pourrait s'occuper de tout de A à Z. Paris réussi. De plus, la communication est très facile et sa réactivité sans faille. Nous recommandons vivement.", date: "12/01/2026" },
+    { name: "Pierre.", title: "Transaction parfaite.", text: "Bonne connaissance des lieux et du bien à vendre, bonne connaissance du fonctionnement de la copro et des prestations du bien à vendre. Disponibilité, réactivité et réponses à nos questions données rapidement par mail ou téléphone. Liens avec le vendeur et le notaire très appréciable. Merci.", date: "16/04/2025" },
+    { name: "MAD", title: "Excellente collaboration", text: "Nous avons confié la vente de notre logement à Fanny Carcélès. Elle géra notre affaire de manière très professionnelle. A l'écoute et bienveillante, elle a su nous mettre en confiance. Ses conseils furent pertinents et fructueux. Nous vous souhaitons une belle continuation", date: "10/04/2025" }
   ];
 
+  const mainRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const servicesRef = useRef<HTMLElement>(null);
+  const reviewsRef = useRef<HTMLElement>(null);
+  const formSectionRef = useRef<HTMLElement>(null);
+  const faqRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+
+  // ============================================================
+  // GSAP ANIMATIONS
+  // ============================================================
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add(
+      {
+        isDesktop: "(min-width: 768px)",
+        isMobile: "(max-width: 767px)",
+        reduceMotion: "(prefers-reduced-motion: reduce)"
+      },
+      (context) => {
+        const { isDesktop, reduceMotion } = context.conditions!;
+        if (reduceMotion) return;
+
+        // ── HERO: Cinematic entrance ──
+        const heroTl = gsap.timeline({ delay: 0.2 });
+
+        // Parallax hero background
+        gsap.to(".hero-bg-img", {
+          yPercent: 30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+
+        // Badge slide in
+        heroTl.from(".hero-badge", {
+          y: -30,
+          autoAlpha: 0,
+          duration: 0.6,
+          ease: "back.out(1.7)"
+        });
+
+        // H1 split text reveal word by word
+        SplitText.create(".hero-title", {
+          type: "words",
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.from(self.words, {
+              y: 80,
+              autoAlpha: 0,
+              rotationX: -40,
+              stagger: 0.06,
+              duration: 0.8,
+              ease: "back.out(1.4)",
+              delay: 0.5
+            });
+          }
+        });
+
+        // Subtitle wipe in
+        heroTl.from(".hero-subtitle", {
+          y: 30,
+          autoAlpha: 0,
+          duration: 0.7,
+          ease: "power2.out"
+        }, "+=0.3");
+
+        // CTAs stagger entrance
+        heroTl.from(".hero-cta", {
+          y: 40,
+          autoAlpha: 0,
+          stagger: 0.15,
+          duration: 0.6,
+          ease: "power3.out"
+        }, "-=0.3");
+
+        // ── SERVICES: Cards fly in with 3D tilt ──
+        const serviceCards = gsap.utils.toArray<HTMLElement>(".service-card");
+        serviceCards.forEach((card, i) => {
+          gsap.from(card, {
+            y: 100,
+            autoAlpha: 0,
+            rotationY: isDesktop ? (i % 2 === 0 ? -15 : 15) : 0,
+            scale: 0.85,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              end: "top 60%",
+              toggleActions: "play none none none"
+            }
+          });
+        });
+
+        // Services section title reveal
+        SplitText.create(".services-title", {
+          type: "chars",
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.from(self.chars, {
+              autoAlpha: 0,
+              y: 40,
+              rotationX: -90,
+              stagger: 0.02,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+              scrollTrigger: {
+                trigger: ".services-title",
+                start: "top 80%",
+                toggleActions: "play none none none"
+              }
+            });
+          }
+        });
+
+        gsap.from(".services-subtitle", {
+          autoAlpha: 0,
+          y: 20,
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".services-subtitle",
+            start: "top 85%",
+            toggleActions: "play none none none"
+          }
+        });
+
+        // Service card icon pulse on scroll
+        gsap.utils.toArray<HTMLElement>(".service-icon").forEach((icon) => {
+          gsap.fromTo(icon,
+            { scale: 0, rotation: -180 },
+            {
+              scale: 1,
+              rotation: 0,
+              duration: 0.8,
+              ease: "back.out(2)",
+              scrollTrigger: {
+                trigger: icon,
+                start: "top 85%",
+                toggleActions: "play none none none"
+              }
+            }
+          );
+        });
+
+        // ── REVIEWS: Horizontal scroll section ──
+        if (isDesktop) {
+          const reviewsTrack = document.querySelector(".reviews-track") as HTMLElement;
+          if (reviewsTrack) {
+            const totalWidth = reviewsTrack.scrollWidth;
+            const viewportWidth = window.innerWidth;
+
+            gsap.to(reviewsTrack, {
+              x: () => -(totalWidth - viewportWidth + 64),
+              ease: "none",
+              scrollTrigger: {
+                trigger: reviewsRef.current,
+                start: "top top",
+                end: () => `+=${totalWidth - viewportWidth}`,
+                scrub: 1,
+                pin: true,
+                anticipatePin: 1
+              }
+            });
+
+            // Each review card fades in as it enters viewport
+            gsap.utils.toArray<HTMLElement>(".review-card").forEach((card, i) => {
+              gsap.from(card, {
+                autoAlpha: 0,
+                scale: 0.8,
+                y: 50,
+                duration: 0.6,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "left 90%",
+                  toggleActions: "play none none none",
+                  containerAnimation: gsap.getById("reviews-scroll") || undefined
+                }
+              });
+            });
+          }
+        }
+
+        // Reviews section title
+        SplitText.create(".reviews-title", {
+          type: "words",
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.from(self.words, {
+              autoAlpha: 0,
+              y: 60,
+              stagger: 0.05,
+              duration: 0.7,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: ".reviews-title",
+                start: "top 85%",
+                toggleActions: "play none none none"
+              }
+            });
+          }
+        });
+
+        // ── FORM SECTION: Dramatic reveal ──
+        gsap.from(".form-container", {
+          y: 80,
+          autoAlpha: 0,
+          scale: 0.95,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: formSectionRef.current,
+            start: "top 75%",
+            toggleActions: "play none none none"
+          }
+        });
+
+        // Form header parallax blobs
+        gsap.to(".form-blob-1", {
+          x: 40,
+          y: -30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: formSectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+        gsap.to(".form-blob-2", {
+          x: -40,
+          y: 30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: formSectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+
+        // Form title split
+        SplitText.create(".form-title", {
+          type: "chars",
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.from(self.chars, {
+              autoAlpha: 0,
+              y: 30,
+              stagger: 0.03,
+              duration: 0.4,
+              ease: "back.out(1.5)",
+              scrollTrigger: {
+                trigger: ".form-title",
+                start: "top 85%",
+                toggleActions: "play none none none"
+              }
+            });
+          }
+        });
+
+        // ── FAQ: Staggered reveal ──
+        SplitText.create(".faq-title", {
+          type: "words",
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.from(self.words, {
+              autoAlpha: 0,
+              y: 50,
+              rotationX: -45,
+              stagger: 0.06,
+              duration: 0.6,
+              ease: "back.out(1.5)",
+              scrollTrigger: {
+                trigger: ".faq-title",
+                start: "top 80%",
+                toggleActions: "play none none none"
+              }
+            });
+          }
+        });
+
+        gsap.utils.toArray<HTMLElement>(".faq-item").forEach((item, i) => {
+          gsap.from(item, {
+            x: i % 2 === 0 ? -60 : 60,
+            autoAlpha: 0,
+            duration: 0.7,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 85%",
+              toggleActions: "play none none none"
+            }
+          });
+        });
+
+        // ── FOOTER: Elements rise up ──
+        gsap.from(".footer-content > *", {
+          y: 40,
+          autoAlpha: 0,
+          stagger: 0.1,
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: footerRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none"
+          }
+        });
+
+        // ── COUNTER ANIMATION for stats (used on commune pages) ──
+        gsap.utils.toArray<HTMLElement>(".counter-number").forEach((el) => {
+          const target = parseInt(el.getAttribute("data-target") || "0", 10);
+          const obj = { val: 0 };
+          gsap.to(obj, {
+            val: target,
+            duration: 2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 85%",
+              toggleActions: "play none none none"
+            },
+            onUpdate: () => {
+              el.textContent = Math.round(obj.val).toLocaleString("fr-FR");
+            }
+          });
+        });
+
+        // ── MAGNETIC CURSOR effect on CTA buttons (desktop only) ──
+        if (isDesktop) {
+          gsap.utils.toArray<HTMLElement>(".magnetic-btn").forEach((btn) => {
+            const xTo = gsap.quickTo(btn, "x", { duration: 0.4, ease: "power3" });
+            const yTo = gsap.quickTo(btn, "y", { duration: 0.4, ease: "power3" });
+
+            btn.addEventListener("mousemove", (e) => {
+              const rect = btn.getBoundingClientRect();
+              const x = e.clientX - rect.left - rect.width / 2;
+              const y = e.clientY - rect.top - rect.height / 2;
+              xTo(x * 0.3);
+              yTo(y * 0.3);
+            });
+
+            btn.addEventListener("mouseleave", () => {
+              xTo(0);
+              yTo(0);
+            });
+          });
+        }
+      }
+    );
+
+  }, { scope: mainRef });
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-[#003366]/20 selection:text-[#003366]">
+    <div ref={mainRef} className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-[#003366]/20 selection:text-[#003366]">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Remplacement du carré par une photo de profil ronde */}
-            <img 
-              src="https://images.iadfrance.fr/profile-picture/d9/2d/03/d92d0312cbef74b230ef7fd2894e55ed153c9303b43e32c15cfc558f41c10959.png?format=auto&width=640" 
-              alt="Fanny Carceles" 
+            <img
+              src="https://images.iadfrance.fr/profile-picture/d9/2d/03/d92d0312cbef74b230ef7fd2894e55ed153c9303b43e32c15cfc558f41c10959.png?format=auto&width=640"
+              alt="Fanny Carceles"
               className="w-12 h-12 rounded-full object-cover border-2 border-[#003366]/10 shadow-sm"
               referrerPolicy="no-referrer"
             />
@@ -203,7 +526,7 @@ export default function Home() {
             <a href="#avis" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Avis clients</a>
             <a href="#faq" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">FAQ</a>
             <a href="#avis-valeur" className="text-sm font-semibold text-slate-600 hover:text-[#003366] transition-colors">Obtenir mon avis de valeur</a>
-            <a href="tel:+33645003752" className="flex items-center gap-2 bg-[#003366]/5 text-[#003366] px-4 py-2 rounded-full font-bold hover:bg-[#003366]/10 transition-colors">
+            <a href="tel:+33645003752" className="flex items-center gap-2 bg-[#003366]/5 text-[#003366] px-4 py-2 rounded-full font-bold hover:bg-[#003366]/10 transition-colors magnetic-btn">
               <Phone className="w-4 h-4" />
               06 45 00 37 52
             </a>
@@ -212,141 +535,158 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-[#001a33] text-white pt-24 pb-32 lg:pt-32 lg:pb-40 overflow-hidden">
+      <section ref={heroRef} className="relative bg-[#001a33] text-white pt-24 pb-32 lg:pt-32 lg:pb-40 overflow-hidden">
         <div className="absolute inset-0 opacity-30">
-          <img 
-            src="https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=2000&q=80" 
-            alt="Vallée du Grésivaudan" 
-            className="w-full h-full object-cover"
+          <img
+            src="https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=2000&q=80"
+            alt="Vallee du Gresivaudan"
+            className="w-full h-full object-cover hero-bg-img will-change-transform"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#001a33] via-[#001a33]/80 to-transparent"></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm font-medium mb-6 backdrop-blur-sm">
+          <div className="max-w-2xl">
+            <div className="hero-badge invisible inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm font-medium mb-6 backdrop-blur-sm">
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
               <span>48 transactions réalisées · 4,8/5 sur 28 avis vérifiés</span>
             </div>
-            <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] drop-shadow-sm">
-              Votre conseillère immobilière à <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x">Allevard‑les‑Bains</span>.
+            <h1 className="hero-title text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] drop-shadow-sm" style={{ perspective: "600px" }}>
+              Votre conseillère immobilière à <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400 animate-gradient-x">Allevard&#8209;les&#8209;Bains</span>.
             </h1>
-            <p className="text-xl text-slate-300 mb-10 leading-relaxed font-light max-w-xl">
-              Vente, achat, estimation : je vous accompagne de l'avis de valeur gratuit jusqu'à la signature chez le notaire. Allevard, Le Collet, Crêts‑en‑Belledonne et tout le Pays d'Allevard.
+            <p className="hero-subtitle invisible text-xl text-slate-300 mb-10 leading-relaxed font-light max-w-xl">
+              Vente, achat, estimation : je vous accompagne de l'avis de valeur gratuit jusqu'à la signature chez le notaire. Allevard, Le Collet, Crêts&#8209;en&#8209;Belledonne et tout le Pays d'Allevard.
             </p>
             <div className="flex flex-col sm:flex-row gap-5">
-              <a href="#avis-valeur" className="bg-white text-[#003366] px-8 py-4 rounded-full font-extrabold text-lg text-center hover:bg-slate-50 transition-all shadow-[0_8px_30px_rgb(255,255,255,0.15)] hover:shadow-[0_8px_30px_rgb(255,255,255,0.3)] flex items-center justify-center gap-2 hover:-translate-y-1">
+              <a href="#avis-valeur" className="hero-cta invisible magnetic-btn bg-white text-[#003366] px-8 py-4 rounded-full font-extrabold text-lg text-center hover:bg-slate-50 transition-all shadow-[0_8px_30px_rgb(255,255,255,0.15)] hover:shadow-[0_8px_30px_rgb(255,255,255,0.3)] flex items-center justify-center gap-2 will-change-transform">
                 Obtenir mon avis de valeur <ArrowRight className="w-5 h-5" />
               </a>
-              <a href="https://www.iadfrance.fr/conseiller-immobilier/fanny.carceles" target="_blank" rel="noopener noreferrer" className="border border-white/20 bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg text-center hover:bg-white/20 transition-all flex items-center justify-center gap-2 hover:-translate-y-1">
+              <a href="https://www.iadfrance.fr/conseiller-immobilier/fanny.carceles" target="_blank" rel="noopener noreferrer" className="hero-cta invisible magnetic-btn border border-white/20 bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg text-center hover:bg-white/20 transition-all flex items-center justify-center gap-2 will-change-transform">
                 Voir ma page IAD <ExternalLink className="w-5 h-5" />
               </a>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-24 bg-white relative">
+      <section ref={servicesRef} id="services" className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pourquoi me confier votre projet ?</h3>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium">Une approche humaine et professionnelle pour concrétiser votre vente dans les meilleures conditions.</p>
+            <h3 className="services-title text-4xl font-extrabold text-slate-900 mb-4 tracking-tight" style={{ perspective: "800px" }}>Pourquoi me confier votre projet ?</h3>
+            <p className="services-subtitle invisible text-lg text-slate-500 max-w-2xl mx-auto font-medium">Une approche humaine et professionnelle pour concrétiser votre vente dans les meilleures conditions.</p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+
+          <div className="grid md:grid-cols-3 gap-8" style={{ perspective: "1000px" }}>
             {[
               { icon: MapPin, title: "Expertise Allevard & Belledonne", desc: "Depuis 2021, j'accompagne vendeurs et acquéreurs sur Allevard-les-Bains, Le Collet, Crêts-en-Belledonne et les communes voisines. Je connais chaque quartier, chaque résidence, chaque copropriété." },
               { icon: TrendingUp, title: "48 transactions réalisées", desc: "Appartements thermaux, maisons familiales, résidences secondaires, terrains constructibles ou biens vendus loués : un portefeuille diversifié adapté au marché local." },
               { icon: CheckCircle2, title: "Accompagnement de A à Z", desc: "De l'estimation gratuite à la signature chez le notaire : visites, négociation, diagnostics, démarches administratives. Vous n'avez qu'un seul interlocuteur." }
             ].map((service, idx) => (
-              <motion.div 
+              <div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.2 }}
-                className="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all group"
+                className="service-card invisible bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:shadow-blue-900/5 transition-shadow group will-change-transform"
               >
-                <div className="w-16 h-16 bg-blue-50/50 shadow-[0_0_15px_rgba(0,51,102,0.05)] border border-blue-100 text-[#003366] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#003366] group-hover:text-white group-hover:shadow-[0_10px_30px_rgba(0,51,102,0.2)] transition-all duration-300">
+                <div className="service-icon w-16 h-16 bg-blue-50/50 shadow-[0_0_15px_rgba(0,51,102,0.05)] border border-blue-100 text-[#003366] rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#003366] group-hover:text-white group-hover:shadow-[0_10px_30px_rgba(0,51,102,0.2)] transition-all duration-300">
                   <service.icon className="w-8 h-8" />
                 </div>
                 <h4 className="text-xl font-bold mb-3 text-slate-900">{service.title}</h4>
                 <p className="text-slate-500 leading-relaxed">{service.desc}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Reviews Section */}
-      <section id="avis" className="py-24 bg-slate-50 border-y border-slate-200/60 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div>
-              <h3 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Ils m'ont fait confiance</h3>
-              <p className="text-lg text-slate-500 font-medium">Découvrez les retours de mes clients sur leur expérience.</p>
-            </div>
-            <a href="https://www.immodvisor.com/professionnels/mandataire-immobilier/pro/iad-france-fanny-carceles-67889" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#003366] font-bold hover:underline">
-              Voir tous les avis sur Immodvisor <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-
-        <div className="relative w-full py-4">
-          {/* Gradient overlays for smooth fade effect on edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 md:w-32 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-12 md:w-32 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none"></div>
-          
-          <div className="flex gap-6 animate-marquee whitespace-nowrap w-max px-6">
-            {[...reviews, ...reviews].map((review, idx) => (
-              <div 
-                key={idx}
-                className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative whitespace-normal flex flex-col w-[320px] md:w-[400px] flex-shrink-0"
-              >
-                <Quote className="absolute top-8 right-8 w-12 h-12 text-slate-50 opacity-50" />
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-[#003366] fill-[#003366]" />
-                  ))}
-                </div>
-                <h4 className="font-bold text-lg text-slate-900 mb-3">{review.title}</h4>
-                <p className="text-slate-700 leading-relaxed mb-8 relative z-10 font-medium line-clamp-6">"{review.text}"</p>
-                <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-auto">
-                  <span className="font-bold text-slate-900">{review.name}</span>
-                  <span className="text-sm text-slate-400">{review.date}</span>
-                </div>
+      {/* Reviews Section — Horizontal scroll on desktop, vertical on mobile */}
+      <section ref={reviewsRef} id="avis" className="bg-slate-50 border-y border-slate-200/60 overflow-hidden">
+        <div className="py-16 md:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div>
+                <h3 className="reviews-title text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Ils m'ont fait confiance</h3>
+                <p className="text-lg text-slate-500 font-medium">Découvrez les retours de mes clients sur leur expérience.</p>
               </div>
-            ))}
+              <a href="https://www.immodvisor.com/professionnels/mandataire-immobilier/pro/iad-france-fanny-carceles-67889" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#003366] font-bold hover:underline magnetic-btn">
+                Voir tous les avis sur Immodvisor <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+
+          {/* Desktop: horizontal scroll track */}
+          <div className="hidden md:block">
+            <div className="reviews-track flex gap-6 px-8 will-change-transform" style={{ width: "max-content" }}>
+              {reviews.map((review, idx) => (
+                <div
+                  key={idx}
+                  className="review-card bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative flex flex-col w-[400px] flex-shrink-0 will-change-transform"
+                >
+                  <Quote className="absolute top-8 right-8 w-12 h-12 text-slate-50 opacity-50" />
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-[#003366] fill-[#003366]" />
+                    ))}
+                  </div>
+                  <h4 className="font-bold text-lg text-slate-900 mb-3">{review.title}</h4>
+                  <p className="text-slate-700 leading-relaxed mb-8 relative z-10 font-medium line-clamp-6">"{review.text}"</p>
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-auto">
+                    <span className="font-bold text-slate-900">{review.name}</span>
+                    <span className="text-sm text-slate-400">{review.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile: CSS marquee (original behavior) */}
+          <div className="md:hidden relative w-full py-4">
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none"></div>
+            <div className="flex gap-6 animate-marquee whitespace-nowrap w-max px-6">
+              {[...reviews, ...reviews].map((review, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative whitespace-normal flex flex-col w-[320px] flex-shrink-0"
+                >
+                  <Quote className="absolute top-8 right-8 w-12 h-12 text-slate-50 opacity-50" />
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-[#003366] fill-[#003366]" />
+                    ))}
+                  </div>
+                  <h4 className="font-bold text-lg text-slate-900 mb-3">{review.title}</h4>
+                  <p className="text-slate-700 leading-relaxed mb-8 relative z-10 font-medium line-clamp-6">"{review.text}"</p>
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-auto">
+                    <span className="font-bold text-slate-900">{review.name}</span>
+                    <span className="text-sm text-slate-400">{review.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Estimation Form Section */}
-      <section id="avis-valeur" className="py-24 bg-white">
+      <section ref={formSectionRef} id="avis-valeur" className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,51,102,0.1)] border border-slate-100 overflow-hidden transition-all hover:shadow-[0_20px_60px_-15px_rgba(0,51,102,0.15)]">
+          <div className="form-container invisible bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,51,102,0.1)] border border-slate-100 overflow-hidden transition-all hover:shadow-[0_20px_60px_-15px_rgba(0,51,102,0.15)]">
             <div className="bg-gradient-to-br from-[#003366] to-[#001a33] p-10 md:p-16 text-center text-white relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-400 rounded-full blur-3xl"></div>
+                <div className="form-blob-1 absolute -top-24 -right-24 w-96 h-96 bg-blue-400 rounded-full blur-3xl will-change-transform"></div>
+                <div className="form-blob-2 absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-400 rounded-full blur-3xl will-change-transform"></div>
               </div>
-              <h3 className="text-4xl font-extrabold mb-4 relative z-10 tracking-tight">Vous souhaitez vendre ?</h3>
+              <h3 className="form-title text-4xl font-extrabold mb-4 relative z-10 tracking-tight">Vous souhaitez vendre ?</h3>
               <p className="text-blue-100 text-lg max-w-2xl mx-auto relative z-10 font-light">
                 Remplissez ce formulaire en quelques secondes. Je vous recontacterai rapidement pour vous proposer un avis de valeur gratuit et confidentiel.
               </p>
             </div>
-            
+
             <div className="p-8 md:p-12 lg:p-16">
               <AnimatePresence mode="wait">
                 {isSuccess ? (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="bg-emerald-50 border border-emerald-100 rounded-3xl p-10 text-center"
@@ -358,7 +698,7 @@ export default function Home() {
                     <p className="text-emerald-700 text-lg mb-8">
                       Merci pour votre confiance. Je vous recontacterai très prochainement au <strong>{formData.phone}</strong> pour discuter de votre projet.
                     </p>
-                    <button 
+                    <button
                       onClick={() => {
                         setIsSuccess(false);
                         setFormData({
@@ -372,11 +712,11 @@ export default function Home() {
                     </button>
                   </motion.div>
                 ) : (
-                  <motion.form 
+                  <motion.form
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    onSubmit={handleSubmit} 
+                    onSubmit={handleSubmit}
                     className="space-y-8"
                   >
                     <div className="space-y-6">
@@ -384,8 +724,8 @@ export default function Home() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Type de bien *</label>
-                          <select 
-                            name="propertyType" 
+                          <select
+                            name="propertyType"
                             required
                             value={formData.propertyType}
                             onChange={handleChange}
@@ -398,13 +738,12 @@ export default function Home() {
                             <option value="Autre">Autre</option>
                           </select>
                         </div>
-                        
-                        {/* Champ Adresse avec Autocomplétion */}
+
                         <div className="relative" ref={addressRef}>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Adresse du bien *</label>
-                          <input 
-                            type="text" 
-                            name="address" 
+                          <input
+                            type="text"
+                            name="address"
                             required
                             autoComplete="off"
                             placeholder="Ex: 12 rue de la Paix, 75000 Paris"
@@ -412,11 +751,10 @@ export default function Home() {
                             onChange={handleAddressChange}
                             className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-[#003366]/10 focus:border-[#003366] outline-none bg-slate-50 transition-all font-medium"
                           />
-                          
-                          {/* Dropdown des suggestions d'adresse */}
+
                           <AnimatePresence>
                             {showSuggestions && addressSuggestions.length > 0 && (
-                              <motion.div 
+                              <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
@@ -440,9 +778,9 @@ export default function Home() {
 
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Surface (m²) *</label>
-                          <input 
-                            type="number" 
-                            name="surface" 
+                          <input
+                            type="number"
+                            name="surface"
                             required
                             min="1"
                             placeholder="Ex: 85"
@@ -453,9 +791,9 @@ export default function Home() {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre de pièces *</label>
-                          <input 
-                            type="number" 
-                            name="rooms" 
+                          <input
+                            type="number"
+                            name="rooms"
                             required
                             min="1"
                             placeholder="Ex: 4"
@@ -472,9 +810,9 @@ export default function Home() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Prénom *</label>
-                          <input 
-                            type="text" 
-                            name="firstName" 
+                          <input
+                            type="text"
+                            name="firstName"
                             required
                             value={formData.firstName}
                             onChange={handleChange}
@@ -483,9 +821,9 @@ export default function Home() {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Nom *</label>
-                          <input 
-                            type="text" 
-                            name="lastName" 
+                          <input
+                            type="text"
+                            name="lastName"
                             required
                             value={formData.lastName}
                             onChange={handleChange}
@@ -494,9 +832,9 @@ export default function Home() {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Email *</label>
-                          <input 
-                            type="email" 
-                            name="email" 
+                          <input
+                            type="email"
+                            name="email"
                             required
                             value={formData.email}
                             onChange={handleChange}
@@ -505,9 +843,9 @@ export default function Home() {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">Téléphone *</label>
-                          <input 
-                            type="tel" 
-                            name="phone" 
+                          <input
+                            type="tel"
+                            name="phone"
                             required
                             value={formData.phone}
                             onChange={handleChange}
@@ -553,8 +891,8 @@ export default function Home() {
                               exit={{ opacity: 0, height: 0, marginTop: 0 }}
                               className="overflow-hidden"
                             >
-                              <textarea 
-                                name="message" 
+                              <textarea
+                                name="message"
                                 rows={3}
                                 placeholder="Précisez les autres atouts ou ajoutez un message..."
                                 value={formData.message}
@@ -567,10 +905,10 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-[#003366] to-[#004d99] text-white py-5 rounded-2xl font-bold text-lg hover:from-[#002244] hover:to-[#003366] transition-all disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 hover:shadow-xl hover:-translate-y-0.5"
+                      className="magnetic-btn w-full bg-gradient-to-r from-[#003366] to-[#004d99] text-white py-5 rounded-2xl font-bold text-lg hover:from-[#002244] hover:to-[#003366] transition-all disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 hover:shadow-xl will-change-transform"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
@@ -594,41 +932,23 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-24 bg-slate-50 border-t border-slate-200/60">
+      <section ref={faqRef} id="faq" className="py-24 bg-slate-50 border-t border-slate-200/60">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Questions fréquentes</h2>
+            <h2 className="faq-title text-4xl font-extrabold text-slate-900 mb-4 tracking-tight" style={{ perspective: "600px" }}>Questions fréquentes</h2>
             <p className="text-lg text-slate-500 font-medium">Tout ce qu'il faut savoir avant de vendre ou acheter à Allevard-les-Bains.</p>
           </div>
 
           <div className="space-y-6">
             {[
-              {
-                q: "Comment obtenir un avis de valeur gratuit à Allevard ?",
-                a: "Remplissez le formulaire ci-dessus avec les informations de votre bien (type, adresse, surface, nombre de pièces). Je vous recontacte sous 24 h pour convenir d'une visite, puis je vous remets un avis de valeur détaillé, gratuit et sans engagement, basé sur ma connaissance du marché local et les transactions récentes comparables."
-              },
-              {
-                q: "Quelles communes couvrez-vous autour d'Allevard ?",
-                a: "J'interviens sur un rayon d'environ 40 km entre Grenoble et Chambéry : Allevard-les-Bains, Le Collet d'Allevard, Crêts-en-Belledonne, La Chapelle-du-Bard, Le Moutaret, Goncelin, Pontcharra, La Rochette et l'ensemble du Pays d'Allevard. Que ce soit un appartement en station thermale, une maison familiale en Belledonne ou un terrain constructible, je connais chaque secteur."
-              },
-              {
-                q: "Quel est le prix moyen au m² à Allevard-les-Bains ?",
-                a: "En 2025, les prix moyens à Allevard s'établissaient autour de 1 900 €/m² pour les appartements et 2 900 €/m² pour les maisons (source : données DVF). Le marché est segmenté : les petites surfaces thermales (studios, T2) se situent entre 60 000 € et 85 000 €, tandis que les maisons familiales démarrent vers 120 000 € selon l'état et la commune. Je vous fournis une estimation précise adaptée à votre bien."
-              },
-              {
-                q: "Combien de temps faut-il pour vendre un bien à Allevard ?",
-                a: "Le délai moyen dépend du type de bien et du positionnement prix. Un appartement bien estimé en centre-ville ou en résidence thermale se vend généralement en 2 à 4 mois. Les maisons et les biens atypiques peuvent prendre plus de temps. Un avis de valeur juste dès le départ est la clé pour vendre dans les meilleurs délais."
-              },
-              {
-                q: "L'estimation est-elle vraiment gratuite et sans engagement ?",
-                a: "Oui, l'avis de valeur est entièrement gratuit et n'engage à rien. C'est un document qui vous donne une fourchette de prix réaliste pour votre bien, basée sur les ventes comparables récentes à Allevard et dans les communes voisines. Vous êtes ensuite libre de me confier la vente ou non."
-              },
-              {
-                q: "Pourquoi acheter à Allevard-les-Bains ?",
-                a: "Allevard combine plusieurs atouts rares : une station thermale reconnue (rhumatologie, voies respiratoires), la proximité du Collet d'Allevard pour le ski, un cadre de montagne à 40 minutes de Grenoble, et des prix encore accessibles par rapport aux grandes stations alpines. C'est un marché attractif pour la résidence principale, la résidence secondaire ou l'investissement locatif (cure, tourisme, ski)."
-              }
+              { q: "Comment obtenir un avis de valeur gratuit à Allevard ?", a: "Remplissez le formulaire ci-dessus avec les informations de votre bien (type, adresse, surface, nombre de pièces). Je vous recontacte sous 24 h pour convenir d'une visite, puis je vous remets un avis de valeur détaillé, gratuit et sans engagement, basé sur ma connaissance du marché local et les transactions récentes comparables." },
+              { q: "Quelles communes couvrez-vous autour d'Allevard ?", a: "J'interviens sur un rayon d'environ 40 km entre Grenoble et Chambéry : Allevard-les-Bains, Le Collet d'Allevard, Crêts-en-Belledonne, La Chapelle-du-Bard, Le Moutaret, Goncelin, Pontcharra, La Rochette et l'ensemble du Pays d'Allevard. Que ce soit un appartement en station thermale, une maison familiale en Belledonne ou un terrain constructible, je connais chaque secteur." },
+              { q: "Quel est le prix moyen au m² à Allevard-les-Bains ?", a: "En 2025, les prix moyens à Allevard s'établissaient autour de 1 900 €/m² pour les appartements et 2 900 €/m² pour les maisons (source : données DVF). Le marché est segmenté : les petites surfaces thermales (studios, T2) se situent entre 60 000 € et 85 000 €, tandis que les maisons familiales démarrent vers 120 000 € selon l'état et la commune. Je vous fournis une estimation précise adaptée à votre bien." },
+              { q: "Combien de temps faut-il pour vendre un bien à Allevard ?", a: "Le délai moyen dépend du type de bien et du positionnement prix. Un appartement bien estimé en centre-ville ou en résidence thermale se vend généralement en 2 à 4 mois. Les maisons et les biens atypiques peuvent prendre plus de temps. Un avis de valeur juste dès le départ est la clé pour vendre dans les meilleurs délais." },
+              { q: "L'estimation est-elle vraiment gratuite et sans engagement ?", a: "Oui, l'avis de valeur est entièrement gratuit et n'engage à rien. C'est un document qui vous donne une fourchette de prix réaliste pour votre bien, basée sur les ventes comparables récentes à Allevard et dans les communes voisines. Vous êtes ensuite libre de me confier la vente ou non." },
+              { q: "Pourquoi acheter à Allevard-les-Bains ?", a: "Allevard combine plusieurs atouts rares : une station thermale reconnue (rhumatologie, voies respiratoires), la proximité du Collet d'Allevard pour le ski, un cadre de montagne à 40 minutes de Grenoble, et des prix encore accessibles par rapport aux grandes stations alpines. C'est un marché attractif pour la résidence principale, la résidence secondaire ou l'investissement locatif (cure, tourisme, ski)." }
             ].map((item, idx) => (
-              <details key={idx} className="group bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <details key={idx} className="faq-item invisible group bg-white rounded-2xl border border-slate-100 shadow-sm">
                 <summary className="flex items-start gap-4 px-6 py-5 cursor-pointer list-none font-bold text-slate-900 hover:text-[#003366] transition-colors">
                   <HelpCircle className="w-5 h-5 mt-0.5 text-[#003366] flex-shrink-0" />
                   <span>{item.q}</span>
@@ -643,26 +963,26 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#001a33] text-slate-400 py-16 text-center border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4">
-          <img 
-            src="https://images.iadfrance.fr/profile-picture/d9/2d/03/d92d0312cbef74b230ef7fd2894e55ed153c9303b43e32c15cfc558f41c10959.png?format=auto&width=640" 
-            alt="Fanny Carceles" 
+      <footer ref={footerRef} className="bg-[#001a33] text-slate-400 py-16 text-center border-t border-white/10">
+        <div className="footer-content max-w-7xl mx-auto px-4">
+          <img
+            src="https://images.iadfrance.fr/profile-picture/d9/2d/03/d92d0312cbef74b230ef7fd2894e55ed153c9303b43e32c15cfc558f41c10959.png?format=auto&width=640"
+            alt="Fanny Carceles"
             className="w-16 h-16 rounded-full object-cover border-2 border-white/20 mx-auto mb-6 grayscale hover:grayscale-0 transition-all duration-500"
             referrerPolicy="no-referrer"
           />
           <h4 className="text-white font-bold text-xl mb-2 tracking-tight">Fanny Carceles</h4>
           <p className="mb-8 font-medium">Conseillère Indépendante en Immobilier - IAD France</p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
-            <a href="mailto:fanny.carceles@iadfrance.fr" className="bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors flex items-center gap-3 text-white">
+            <a href="mailto:fanny.carceles@iadfrance.fr" className="magnetic-btn bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors flex items-center gap-3 text-white will-change-transform">
               <Mail className="w-5 h-5" /> fanny.carceles@iadfrance.fr
             </a>
-            <a href="tel:+33645003752" className="bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors flex items-center gap-3 text-white">
+            <a href="tel:+33645003752" className="magnetic-btn bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors flex items-center gap-3 text-white will-change-transform">
               <Phone className="w-5 h-5" /> 06 45 00 37 52
             </a>
           </div>
-          
+
           <div className="flex items-center justify-center gap-6 mb-12">
             <a href="https://www.facebook.com/profile.php?id=100093367500164" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white/5 hover:bg-blue-600 hover:scale-110 rounded-full flex items-center justify-center transition-all text-white">
               <Facebook className="w-6 h-6" />
@@ -671,7 +991,7 @@ export default function Home() {
               <Instagram className="w-6 h-6" />
             </a>
           </div>
-          
+
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
             <p>&copy; {new Date().getFullYear()} Fanny Carceles. Tous droits réservés.</p>
             <div className="flex flex-wrap items-center justify-center gap-6">
