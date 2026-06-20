@@ -58,9 +58,6 @@ export default async function handler(req, res) {
     return res.status(response.status).json(result);
   } catch (error) {
     console.error('Erreur proxy Web3Forms:', error);
-    // Diagnostic temporaire : on expose le message d'erreur réel.
-    return res
-      .status(500)
-      .json({ success: false, message: 'Erreur serveur', debug: String(error?.message || error) });
+    return res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 }
